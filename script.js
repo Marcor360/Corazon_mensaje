@@ -15,7 +15,7 @@
     var opts = {
         seed: {
             x: width / 2 - 20,
-            color: "rgb(190, 26, 37)",
+            color: "rgb(199, 65, 123)", // Color del corazón inicial
             scale: 2
         },
         branch: [
@@ -110,7 +110,7 @@
         tree.snapshot("p2", 500, 0, 610, 680);
 
         canvas.parent().css("background", "url(" + tree.toDataURL('image/png') + ")");
-        canvas.css("background", "#F5E8DC");
+        canvas.css("background", "#f0e6fa"); // Actualizado al nuevo color de fondo
         $await(Jscex.Async.sleep(300));
         canvas.css("background", "none");
     }));
