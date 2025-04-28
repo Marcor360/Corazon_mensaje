@@ -53,31 +53,15 @@
     var foot = tree.footer;
     var hold = 1;
 
+    // Ya hay un botón en HTML, no necesitamos crearlo aquí
+    /* 
     // Agregar botón de inicio más visible
     var startButton = $('<button id="start-animation">Iniciar Animación ❤️</button>');
-    startButton.css({
-        'position': 'absolute',
-        'top': '50%',
-        'left': '50%',
-        'transform': 'translate(-50%, -50%)',
-        'padding': '15px 30px',
-        'background-color': '#c7417b',
-        'color': 'white',
-        'border': 'none',
-        'border-radius': '50px',
-        'font-size': '18px',
-        'cursor': 'pointer',
-        'box-shadow': '0 4px 15px rgba(0,0,0,0.3)',
-        'z-index': '999',
-        'transition': 'all 0.3s ease'
-    });
-    startButton.hover(function () {
-        $(this).css('background-color', '#a73264');
-    }, function () {
-        $(this).css('background-color', '#c7417b');
-    });
+    ...
+    */
 
-    $('#wrap').append(startButton);
+    // Usar el botón existente del HTML
+    var startButton = $('#inicio-btn');
 
     // Función para iniciar la animación
     function startAnimation() {
@@ -86,16 +70,31 @@
             $(this).remove();
         });
 
-        // Intentar reproducir la música automáticamente
+        // Reproducir la música inmediatamente con fade-in
         var audio = document.getElementById('media');
         if (audio) {
-            audio.play().catch(function (e) {
+            // Iniciar con volumen bajo y aumentarlo gradualmente
+            audio.volume = 0;
+            audio.play().then(function () {
+                // Aumentar volumen gradualmente para un inicio suave
+                var fadeAudio = setInterval(function () {
+                    if (audio.volume < 0.9) {
+                        audio.volume += 0.1;
+                    } else {
+                        audio.volume = 1;
+                        clearInterval(fadeAudio);
+                    }
+                }, 200);
+            }).catch(function (e) {
                 console.log("Autoplay prevented:", e);
             });
         }
 
         // Mostrar el botón de control de audio
         $('#audio-control').fadeIn(500);
+
+        // Actualizar el texto del botón de audio para reflejar el estado
+        $('#play-music').text('♫ Pausar música');
     }
 
     // Evento de clic en el botón de inicio
@@ -130,6 +129,10 @@
     var autoStartTimer = setTimeout(function () {
         if (hold === 1) { // Solo si no se ha iniciado manualmente
             startAnimation();
+            // Asegurarse de que el botón desaparezca en caso de inicio automático
+            if (startButton && startButton.is(':visible')) {
+                startButton.fadeOut(500);
+            }
         }
     }, 5000);
 

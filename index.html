@@ -64,6 +64,46 @@
                 background-position: 60px 0;
             }
         }
+
+        /* Estilos para el botón de inicio */
+        #inicio-btn {
+            position: absolute;
+            top: 70%;
+            /* Cambiado de 50% a 70% para moverlo más abajo */
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            background-color: #c7417b;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse 1.5s infinite;
+            display: block;
+        }
+
+        #inicio-btn:hover {
+            background-color: #a73264;
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
     </style>
 </head>
 
@@ -77,6 +117,9 @@
         </div>
 
         <div id="wrap">
+            <!-- Botón de inicio principal -->
+            <button id="inicio-btn">Iniciar Animación ❤️</button>
+
             <div id="text">
                 <div id="code">
                     <span class="say">Para el amor de mi vida</span><br><br>
@@ -129,16 +172,64 @@
         // Mostrar mensaje de carga
         $(document).ready(function () {
             $('#loading-message').fadeIn(500);
+            var animationStarted = false;
 
             // Iniciar ahora botón
             $('#start-now').on('click', function () {
                 $('#loading-message').fadeOut(500);
+                if (!animationStarted) {
+                    startAnimation();
+                    animationStarted = true;
+                }
             });
 
-            // Ocultar después de 5 segundos
+            // Ocultar después de 5 segundos y comenzar animación
             setTimeout(function () {
                 $('#loading-message').fadeOut(500);
+                if (!animationStarted) {
+                    startAnimation();
+                    animationStarted = true;
+                }
             }, 5000);
+
+            // Manejar el botón de inicio principal
+            $('#inicio-btn').on('click', function () {
+                if (!animationStarted) {
+                    startAnimation();
+                    animationStarted = true;
+                }
+            });
+
+            // Función para iniciar la animación
+            function startAnimation() {
+                $('#inicio-btn').fadeOut(500);
+                window.hold = 0; // Desbloquea la animación
+
+                // Reproducir música inmediatamente
+                var audio = document.getElementById('media');
+                if (audio) {
+                    // Reproducir con volumen bajo y aumentarlo gradualmente
+                    audio.volume = 0;
+                    audio.play().then(function () {
+                        // Aumentar volumen gradualmente
+                        var fadeAudio = setInterval(function () {
+                            if (audio.volume < 0.9) {
+                                audio.volume += 0.1;
+                            } else {
+                                audio.volume = 1;
+                                clearInterval(fadeAudio);
+                            }
+                        }, 200);
+                    }).catch(function (e) {
+                        console.log("Autoplay prevented:", e);
+                        // Mostrar un mensaje pidiendo al usuario que habilite el sonido
+                        $('#audio-control').fadeIn(500);
+                    });
+                }
+
+                // Mostrar el botón de audio solo si la reproducción automática falló
+                $('#audio-control').fadeIn(500);
+            }
         });
     </script>
 
