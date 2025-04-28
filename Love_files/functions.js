@@ -34,7 +34,7 @@ $(window).resize(function () {
 
 function timeElapse(date) {
     var current = new Date(); // ← CORREGIDO
-	current.setHours(current.getHours() - 1);
+    current.setHours(current.getHours() - 1);
     var seconds = (current.getTime() - date.getTime()) / 1000;
 
     var days = Math.floor(seconds / (3600 * 24));

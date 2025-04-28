@@ -53,21 +53,46 @@
     var foot = tree.footer;
     var hold = 1;
 
-    canvas.click(function (e) {
+    // Importante: Agregar transparencia para que los eventos de click funcionen
+    $(canvas).css('pointer-events', 'auto');
+
+    canvas.on('click', function (e) {
         var offset = canvas.offset(), x, y;
         x = e.pageX - offset.left;
         y = e.pageY - offset.top;
+        console.log("Click en: ", x, y); // Para verificar que se captura el evento
+
         if (seed.hover(x, y)) {
             hold = 0;
-            canvas.unbind("click");
-            canvas.unbind("mousemove");
+            canvas.off("click");
+            canvas.off("mousemove");
             canvas.removeClass('hand');
+            console.log("Clic en la semilla detectado");
         }
-    }).mousemove(function (e) {
+    }).on('mousemove', function (e) {
         var offset = canvas.offset(), x, y;
         x = e.pageX - offset.left;
         y = e.pageY - offset.top;
         canvas.toggleClass('hand', seed.hover(x, y));
+    });
+
+    // También agregar soporte para dispositivos táctiles
+    canvas.on('touchstart', function (e) {
+        e.preventDefault();
+        var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
+        var offset = canvas.offset(), x, y;
+        x = touch.pageX - offset.left;
+        y = touch.pageY - offset.top;
+        console.log("Touch en: ", x, y);
+
+        if (seed.hover(x, y)) {
+            hold = 0;
+            canvas.off("touchstart");
+            canvas.off("click");
+            canvas.off("mousemove");
+            canvas.removeClass('hand');
+            console.log("Touch en la semilla detectado");
+        }
     });
 
     var seedAnimate = eval(Jscex.compile("async", function () {
@@ -152,5 +177,34 @@
         $await(jumpAnimate());
     }));
 
-    runAsync().start();
+    // Para debugging - muestra un mensaje cuando el árbol está listo
+    console.log("Árbol preparado, haz clic en el corazón para comenzar");
+
+    // Asegúrate de que la semilla esté dibujada antes de iniciar
+    setTimeout(function () {
+        seed.draw();
+        // Hacemos el corazón más visible
+        seed.setHeartScale(1.2);
+        seed.drawHeart();
+        console.log("Semilla dibujada");
+    }, 100);
+
+    // Inicia la animación después de un breve retraso
+    setTimeout(function () {
+        runAsync().start();
+    }, 500);
+
+    // Manejo del botón de audio
+    $('#play-music').on('click', function () {
+        var audio = document.getElementById('media');
+        if (audio) {
+            if (audio.paused) {
+                audio.play();
+                $(this).text('♫ Pausar música');
+            } else {
+                audio.pause();
+                $(this).text('♫ Reproducir música');
+            }
+        }
+    });
 })();

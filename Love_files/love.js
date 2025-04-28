@@ -166,7 +166,7 @@
 
             ctx.moveTo(0, 0);
             ctx.scale(0.75, 0.75);
-            ctx.font = "12px 微软雅黑,Verdana";
+            ctx.font = "12px 'Segoe UI', Arial, sans-serif";
             ctx.fillText("click here", 23, 16);
             ctx.restore();
         },
@@ -177,9 +177,36 @@
             ctx.clearRect(point.x - w, point.y - h, 4 * w, 4 * h);
         },
         hover: function (x, y) {
-            var ctx = this.tree.ctx;
-            var pixel = ctx.getImageData(x, y, 1, 1);
-            return pixel.data[3] == 255
+            try {
+                // Incrementar el área de detección
+                var ctx = this.tree.ctx;
+                var scale = this.heart.scale;
+                var point = this.heart.point;
+
+                // Calcular la distancia desde el centro del corazón
+                var dx = x - point.x;
+                var dy = y - point.y;
+                var distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Radio de detección aumentado (20 * escala del corazón)
+                var detectionRadius = 20 * scale;
+
+                // Si está dentro del radio de detección, considerarlo como hover
+                if (distance <= detectionRadius) {
+                    return true;
+                }
+
+                // Intentar el método original como respaldo
+                var pixel = ctx.getImageData(x, y, 1, 1);
+                return pixel.data[3] > 0;
+            } catch (e) {
+                console.error("Error en hover:", e);
+                // En caso de error, usamos un enfoque más simple
+                var heart = this.heart;
+                var dx = x - heart.point.x;
+                var dy = y - heart.point.y;
+                return dx * dx + dy * dy < 30 * 30 * heart.scale * heart.scale;
+            }
         }
     }
 
@@ -343,13 +370,20 @@
 
         createBloom: function (width, height, radius, figure, color, alpha, angle, scale, place, speed) {
             var x, y;
-            while (true) {
+            var attempts = 0;
+            var maxAttempts = 100; // Evitar bucle infinito
+
+            while (attempts < maxAttempts) {
                 x = random(20, width - 20);
                 y = random(20, height - 20);
                 if (inheart(x - width / 2, height - (height - 40) / 2 - y, radius)) {
                     return new Bloom(this, new Point(x, y), figure, color, alpha, angle, scale, place, speed);
                 }
+                attempts++;
             }
+
+            // Si llegamos aquí, usamos una posición por defecto
+            return new Bloom(this, new Point(width / 2, height / 2), figure, color, alpha, angle, scale, place, speed);
         },
 
         canFlower: function () {
@@ -382,6 +416,8 @@
         move: function (k, x, y) {
             var s = this, ctx = s.ctx;
             var rec = s.record[k || "move"];
+            if (!rec) return false;
+
             var point = rec.point,
                 image = rec.image,
                 speed = rec.speed || 10,
@@ -456,7 +492,7 @@
             ctx.save();
             ctx.beginPath();
             ctx.fillStyle = 'rgb(19, 156, 31)'; // Color de las ramas
-            ctx.shadowColor = '##22b822'; // Sombra violeta
+            ctx.shadowColor = '#22b822'; // Sombra
             ctx.shadowBlur = 2;
             ctx.moveTo(p.x, p.y);
             ctx.arc(p.x, p.y, s.radius, 0, 2 * Math.PI);

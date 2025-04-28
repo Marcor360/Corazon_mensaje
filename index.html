@@ -3,6 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Love You by AlexDev</title>
     <link rel="icon" type="image/x-icon" href="Love_files/icon.png">
     <meta name="language" content="es-ES">
@@ -59,7 +60,16 @@
         </div>
     </div>
 
-    <audio preload="auto" autoplay="" id="media" src="Love_files/love.mp3" autoplay preload loop="loop"></audio>
+    <!-- Controles de audio con reproducción automática y bucle -->
+    <audio id="media" preload="auto" loop>
+        <source src="Love_files/love.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Botón de reproducción de audio para dispositivos móviles -->
+    <div id="audio-control">
+        <button id="play-music">♫ Reproducir música</button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 
