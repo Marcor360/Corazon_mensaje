@@ -53,47 +53,85 @@
     var foot = tree.footer;
     var hold = 1;
 
-    // Importante: Agregar transparencia para que los eventos de click funcionen
-    $(canvas).css('pointer-events', 'auto');
+    // Agregar botón de inicio más visible
+    var startButton = $('<button id="start-animation">Iniciar Animación ❤️</button>');
+    startButton.css({
+        'position': 'absolute',
+        'top': '50%',
+        'left': '50%',
+        'transform': 'translate(-50%, -50%)',
+        'padding': '15px 30px',
+        'background-color': '#c7417b',
+        'color': 'white',
+        'border': 'none',
+        'border-radius': '50px',
+        'font-size': '18px',
+        'cursor': 'pointer',
+        'box-shadow': '0 4px 15px rgba(0,0,0,0.3)',
+        'z-index': '999',
+        'transition': 'all 0.3s ease'
+    });
+    startButton.hover(function () {
+        $(this).css('background-color', '#a73264');
+    }, function () {
+        $(this).css('background-color', '#c7417b');
+    });
 
+    $('#wrap').append(startButton);
+
+    // Función para iniciar la animación
+    function startAnimation() {
+        hold = 0;
+        startButton.fadeOut(500, function () {
+            $(this).remove();
+        });
+
+        // Intentar reproducir la música automáticamente
+        var audio = document.getElementById('media');
+        if (audio) {
+            audio.play().catch(function (e) {
+                console.log("Autoplay prevented:", e);
+            });
+        }
+
+        // Mostrar el botón de control de audio
+        $('#audio-control').fadeIn(500);
+    }
+
+    // Evento de clic en el botón de inicio
+    startButton.on('click', function () {
+        startAnimation();
+    });
+
+    // También mantener la capacidad de hacer clic en el corazón
     canvas.on('click', function (e) {
         var offset = canvas.offset(), x, y;
         x = e.pageX - offset.left;
         y = e.pageY - offset.top;
-        console.log("Click en: ", x, y); // Para verificar que se captura el evento
 
         if (seed.hover(x, y)) {
-            hold = 0;
-            canvas.off("click");
-            canvas.off("mousemove");
-            canvas.removeClass('hand');
-            console.log("Clic en la semilla detectado");
+            startAnimation();
         }
-    }).on('mousemove', function (e) {
-        var offset = canvas.offset(), x, y;
-        x = e.pageX - offset.left;
-        y = e.pageY - offset.top;
-        canvas.toggleClass('hand', seed.hover(x, y));
     });
 
-    // También agregar soporte para dispositivos táctiles
+    // Soporte táctil
     canvas.on('touchstart', function (e) {
-        e.preventDefault();
         var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
         var offset = canvas.offset(), x, y;
         x = touch.pageX - offset.left;
         y = touch.pageY - offset.top;
-        console.log("Touch en: ", x, y);
 
         if (seed.hover(x, y)) {
-            hold = 0;
-            canvas.off("touchstart");
-            canvas.off("click");
-            canvas.off("mousemove");
-            canvas.removeClass('hand');
-            console.log("Touch en la semilla detectado");
+            startAnimation();
         }
     });
+
+    // Iniciar automáticamente después de 5 segundos
+    var autoStartTimer = setTimeout(function () {
+        if (hold === 1) { // Solo si no se ha iniciado manualmente
+            startAnimation();
+        }
+    }, 5000);
 
     var seedAnimate = eval(Jscex.compile("async", function () {
         seed.draw();
@@ -177,22 +215,12 @@
         $await(jumpAnimate());
     }));
 
-    // Para debugging - muestra un mensaje cuando el árbol está listo
-    console.log("Árbol preparado, haz clic en el corazón para comenzar");
+    // Iniciar la animación desde el principio
+    runAsync().start();
 
-    // Asegúrate de que la semilla esté dibujada antes de iniciar
-    setTimeout(function () {
-        seed.draw();
-        // Hacemos el corazón más visible
-        seed.setHeartScale(1.2);
-        seed.drawHeart();
-        console.log("Semilla dibujada");
-    }, 100);
-
-    // Inicia la animación después de un breve retraso
-    setTimeout(function () {
-        runAsync().start();
-    }, 500);
+    // Hacer el corazón inicial más grande para que sea más visible
+    seed.setHeartScale(1.2);
+    seed.drawHeart();
 
     // Manejo del botón de audio
     $('#play-music').on('click', function () {
@@ -207,4 +235,7 @@
             }
         }
     });
+
+    // Ocultar el botón de audio inicialmente
+    $('#audio-control').hide();
 })();
